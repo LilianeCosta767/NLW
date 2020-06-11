@@ -1,20 +1,17 @@
 import express from 'express';
-import knex from './database/connection';
+import PointsController from './controllers/PointsController';
+import ItemsController from './controllers/ItemsController';
 
 const routes = express.Router(); // para conseguir desacomplar as rotas do aqruivo principal
+const pointsController = new PointsController();
+const itemsController = new ItemsController();
 
-routes.get('/items', async (request, response) => {
-    const items = await knex('items').select('*'); // mesmo que SELECT * FFROM items
+routes.get('/items', itemsController.index);
 
-    const serializedItems = items.map(item => {
-        return {
-            title: item.title,
-            image_url: `http://localhost:3333/uploads/${item.image}`,
-        };
-    });
+routes.post('/points', pointsController.create);
+routes.get('/points', pointsController.index);
+routes.get('/points/:id', pointsController.show);
 
-    return response.json(serializedItems);
-});
 
 export default routes;
 
@@ -24,3 +21,4 @@ export default routes;
 // função assincrona é algo que executa em paralelo ao seu código e não sequencialmente
 // serialized: as infomações do banco não estão exatamente como preciso retornar para o front, entao serielized é uma transformação dos dados por um novo formato
 // map retorna todos os itens do banco de dados e modifica como desejado
+// trx: serve para dizer que se uma query falhar a outra nao vai executrar, isso graças ao transaction
